@@ -14,7 +14,7 @@ namespace Lolobot.Modules
         [Command("addfaq")]
         [Remarks("Lets you add a new FAQ. (mchelpers and admins/mods only)")]
         [Alias("newfaq")]
-        [MinPermissions(AccessLevel.User)] //*********************** Remember this ^
+        [MinPermissions(AccessLevel.User)] //*********************** Remember this ^ test
         public async Task waifuinfo([Remainder] IUser user = null)
         {
           
