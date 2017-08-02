@@ -392,6 +392,106 @@ namespace Lolobot
 
         }
 
+        public static bool AddFaq(string keyword, string URL, string description, IUser user)
+        {
+            var result = CheckExistingFAQ(keyword);
+            if (result.Count() > 0)
+            {
+                return false;
+            }
+
+            var database = new Database("discordbot");
+
+            var str = string.Format("INSERT INTO faq (genre, keyword, url , description, authorid, timesused) VALUES ('0', '{0}', '{1}', '{2}', '{3}', '0')", keyword, URL, description, user.Id);
+            var table = database.FireCommand(str);
+            table.Close();
+            database.CloseConnection();
+
+            return true;
+        }
+
+        public static List<string> CheckExistingFAQ(string keywordSearch)
+        {
+            var result = new List<string>();
+            var database = new Database("discordbot");
+
+            var str = string.Format("SELECT * FROM faq WHERE keyword = '{0}'", keywordSearch);
+            var tableName = database.FireCommand(str);
+
+            while (tableName.Read())
+            {
+                var keyword = (string)tableName["keyword"];
+
+                result.Add(keyword);
+            }
+
+            tableName.Close();
+
+            return result;
+        }
+
+        public static void DelFaq(string keyword)
+        {
+            var database = new Database("discordbot");
+
+            try
+            {
+                var strings = string.Format("DELETE FROM faq WHERE keyword = '{0}'", keyword);
+                var reader = database.FireCommand(strings);
+                reader.Close();
+                database.CloseConnection();
+                return;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                database.CloseConnection();
+                return;
+            }
+        }
+
+        public static List<string> GetAllKeywords()
+        {
+            var result = new List<string>();
+            var database = new Database("discordbot");
+
+            var str = string.Format("SELECT keyword FROM faq");
+            var tableName = database.FireCommand(str);
+
+            while (tableName.Read())
+            {
+                var keyword = (string)tableName["keyword"];
+
+                result.Add(keyword);
+            }
+
+            tableName.Close();
+
+            return result;
+        }
+
+
+        public static void AddOneToTimesUsed(string keyword)
+        {
+            var database = new Database("discordbot");
+
+            try
+            {
+                var strings = string.Format("UPDATE faq SET timesused = timesused + 1 WHERE keyword = '{0}'", keyword);
+                var reader = database.FireCommand(strings);
+                reader.Close();
+                database.CloseConnection();
+                return;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                database.CloseConnection();
+                return;
+            }
+        }
+
+
     }
 
 }

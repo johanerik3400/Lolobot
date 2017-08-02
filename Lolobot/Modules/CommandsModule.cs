@@ -94,9 +94,9 @@ namespace Lolobot.Modules
             await dmChannel.SendMessageAsync("", false, builder.Build());
         }
 
-        [Command("test")]
-        [Remarks("test")]
-        public async Task test(IUser user)
+        [Command("StreamerTest")]
+        [Remarks("StreamerTest")]
+        public async Task StreamerTest(IUser user)
         {
             if(user.Game.GetValueOrDefault().StreamType == StreamType.Twitch)
             {
@@ -106,7 +106,18 @@ namespace Lolobot.Modules
             {
                 await ReplyAsync($"User is not streaming: {user.Game.GetValueOrDefault().StreamType}");
             }
-        }
+            /*var eb = new EmbedBuilder();
+            eb.WithColor(0xFF69B4);
+
+            eb.WithAuthor("Girl Rating For Agnese Sanctis#5694");
+            eb.AddField("**Hot**","9.88", true);
+            eb.AddField("**Crazy**","6.88", true);
+            eb.AddField("**Advice**","Above an 8 hot, and between about 7 and a 5 crazy - this is WIFE ZONE. If you meet this girl, you should consider long-term relationship.Rare.", true);
+            eb.WithImageUrl("https://puu.sh/wcOqN/aec0cd6536.jpg");
+
+            await ReplyAsync("", false, eb);*/
+        
+    }
     }
 
 }
