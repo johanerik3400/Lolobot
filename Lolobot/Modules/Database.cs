@@ -426,6 +426,7 @@ namespace Lolobot
             }
 
             tableName.Close();
+            database.CloseConnection();
 
             return result;
         }
@@ -466,6 +467,7 @@ namespace Lolobot
             }
 
             tableName.Close();
+            database.CloseConnection();
 
             return result;
         }
@@ -491,6 +493,412 @@ namespace Lolobot
             }
         }
 
+
+        public static bool AddWeekly(IUser user, string content)
+        {
+            UserCheck(user);
+
+            var result = CheckExistingWeekly(user);
+            if (result.Count() > 0)
+            {
+                return false;
+            }
+
+            var database = new Database("discordbot");
+
+            var str = string.Format("INSERT INTO weekly (userid, content) VALUES ('{0}', '{1}')", user.Id, content);
+            var table = database.FireCommand(str);
+            table.Close();
+            database.CloseConnection();
+
+            return true;
+        }
+
+        public static List<ulong> CheckExistingWeekly(IUser user)
+        {
+            var result = new List<ulong>();
+            var database = new Database("discordbot");
+
+            var str = string.Format("SELECT * FROM weekly WHERE userid = '{0}'", user.Id);
+            var tableName = database.FireCommand(str);
+
+            while (tableName.Read())
+            {
+                var userId = (ulong)tableName["userid"];
+
+                result.Add(userId);
+            }
+
+            tableName.Close();
+            database.CloseConnection();
+
+            return result;
+        }
+
+        public static List<weekly> GetWeekly(IUser user)
+        {
+            var result = new List<weekly>();
+
+            var database = new Database("discordbot");
+
+            var str = string.Format("SELECT * FROM weekly WHERE userid = '{0}'", user.Id);
+            var tableName = database.FireCommand(str);
+
+            while (tableName.Read())
+            {
+                var userid = (ulong)tableName["userid"];
+                var content = (string)tableName["content"];
+
+                result.Add(new weekly
+                {
+                    UserId = userid,
+                    Content = content,
+                });
+            }
+            tableName.Close();
+            database.CloseConnection();
+
+            return result;
+        }
+
+        public static List<weekly> GetAllWeekly()
+        {
+            var result = new List<weekly>();
+
+            var database = new Database("discordbot");
+
+            var str = string.Format("SELECT * FROM weekly");
+            var tableName = database.FireCommand(str);
+
+            while (tableName.Read())
+            {
+                var userid = (ulong)tableName["userid"];
+                var content = (string)tableName["content"];
+
+                result.Add(new weekly
+                {
+                    UserId = userid,
+                    Content = content,
+                });
+            }
+            tableName.Close();
+            database.CloseConnection();
+
+            return result;
+
+        }
+
+        public static void DelWeekly(IUser user)
+        {
+            var database = new Database("discordbot");
+
+            try
+            {
+                var strings = string.Format("DELETE FROM weekly WHERE userid = '{0}'", user.Id);
+                var reader = database.FireCommand(strings);
+                reader.Close();
+                database.CloseConnection();
+                return;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                database.CloseConnection();
+                return;
+            }
+        }
+
+
+        public static List<top5> GetTop5(int entry1, int entry2, int entry3, int entry4, int entry5)
+        {
+            var result = new List<top5>();
+
+            var database = new Database("discordbot");
+
+            var str = string.Format("SELECT * FROM weekly WHERE id = '{0}' or id = '{1}' or id = '{2}' or id = '{3}' or id = '{4}'", entry1, entry2, entry3, entry4, entry5);
+            var tableName = database.FireCommand(str);
+
+            while (tableName.Read())
+            {
+                var userid = (ulong)tableName["userid"];
+                var content = (string)tableName["content"];
+
+                result.Add(new top5
+                {
+                    UserId = userid,
+                    Content = content,
+                });
+            }
+            tableName.Close();
+            database.CloseConnection();
+
+            return result;
+
+        }
+
+
+        public static void DelTop5()
+        {
+            var database = new Database("discordbot");
+
+            try
+            {
+                var strings = string.Format("DELETE FROM top5; ALTER TABLE top5 AUTO_INCREMENT = 1");
+                var reader = database.FireCommand(strings);
+                reader.Close();
+                database.CloseConnection();
+                return;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                database.CloseConnection();
+                return;
+            }
+        }
+
+        public static List<top5> MakeTop5(int entry1, int entry2, int entry3, int entry4, int entry5)
+        {
+            var top5 = GetTop5(entry1, entry2, entry3, entry4, entry5);
+
+            var database = new Database("discordbot");
+
+            DelVotedfor();
+            DelTop5();
+
+
+            foreach (var entry in top5)
+            {
+                var replacedContent = entry.Content.Replace("'", "''");
+
+                var str = string.Format("INSERT INTO top5(userid, content) VALUES('{0}', '{1}')", entry.UserId, replacedContent);
+                var tableName = database.FireCommand(str);
+                tableName.Close();
+            }
+
+            database.CloseConnection();
+
+            return top5;
+
+        }
+
+        public static void DelVotedfor()
+        {
+            var database = new Database("discordbot");
+
+            try
+            {
+                var strings = string.Format("DELETE FROM votedfor; ALTER TABLE top5 AUTO_INCREMENT = 1");
+                var reader = database.FireCommand(strings);
+                reader.Close();
+                database.CloseConnection();
+                return;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                database.CloseConnection();
+                return;
+            }
+        }
+
+        public static void AddVote(IUser user, int vote)
+        {
+            UserCheck(user);
+
+            var database = new Database("discordbot");
+
+            var str = string.Format("INSERT INTO votedfor (userid, voted) VALUES ('{0}', '{1}')", user.Id, vote);
+            var table = database.FireCommand(str);
+            table.Close();
+            database.CloseConnection();
+
+            return;
+        }
+
+        public static void ChangeVote(IUser user, int vote)
+        {
+            var database = new Database("discordbot");
+
+            try
+            {
+                var strings = string.Format("UPDATE votedfor SET voted = '{0}' WHERE userid = '{1}'", vote, user.Id);
+                var reader = database.FireCommand(strings);
+                reader.Close();
+                database.CloseConnection();
+                return;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                database.CloseConnection();
+                return;
+            }
+        }
+
+        public static List<votedfor> GetVotedfor(IUser user)
+        {
+            var result = new List<votedfor>();
+
+            var database = new Database("discordbot");
+
+            var str = string.Format("SELECT * FROM votedfor WHERE userid = '{0}'", user.Id);
+            var tableName = database.FireCommand(str);
+
+            while (tableName.Read())
+            {
+                var userid = (ulong)tableName["userid"];
+                var voted = (int)tableName["voted"];
+
+                result.Add(new votedfor
+                {
+                    UserId = userid,
+                    Voted = voted,
+                });
+            }
+            tableName.Close();
+            database.CloseConnection();
+
+            return result;
+
+        }
+
+        public static List<top5> ShowTop5()
+        {
+            var database = new Database("discordbot");
+
+
+            var result = new List<top5>();
+            var str = string.Format("SELECT * FROM top5");
+            var tableName = database.FireCommand(str);
+
+            while (tableName.Read())
+            {
+                var userid = (ulong)tableName["userid"];
+                var content = (string)tableName["content"];
+
+                result.Add(new top5
+                {
+                    UserId = userid,
+                    Content = content,
+                });
+            }
+            tableName.Close();
+            database.CloseConnection();
+
+            return result;
+        }
+
+        public static List<top5> GetTop5ByID(int id)
+        {
+            var result = new List<top5>();
+
+            var database = new Database("discordbot");
+
+            var str = string.Format("SELECT * FROM top5 WHERE id = '{0}'", id);
+            var tableName = database.FireCommand(str);
+
+            while (tableName.Read())
+            {
+                var userid = (ulong)tableName["userid"];
+                var content = (string)tableName["content"];
+
+                result.Add(new top5
+                {
+                    UserId = userid,
+                    Content = content,
+                });
+            }
+            tableName.Close();
+            database.CloseConnection();
+
+            return result;
+
+        }
+
+        public static List<winners> GetWinners()
+        {
+            var result = new List<winners>();
+
+            var database = new Database("discordbot");
+
+            for (int i = 1; i < 6; i++)
+            {
+                var str = string.Format("SELECT * FROM votedfor WHERE voted = '{0}'", i);
+                var tableName = database.FireCommand(str);
+
+                var votes = 0;
+
+                while (tableName.Read())
+                {
+                    votes++;
+                }
+
+                result.Add(new winners
+                {
+                    ID = i,
+                    Votes = votes,
+                });
+
+                tableName.Close();
+            }
+
+            List<winners> SortedList = result.OrderBy(o => o.Votes).ToList();
+            SortedList.Reverse();
+
+            database.CloseConnection();
+
+            return SortedList;
+
+        }
+
+
+        public static bool CheckExistingTheme(int id)
+        {
+            var database = new Database("discordbot");
+
+            var str = string.Format("SELECT * FROM weeklytheme WHERE ID = '{0}'", id);
+            var tableName = database.FireCommand(str);
+
+            while (tableName.Read())
+            {
+                tableName.Close();
+                database.CloseConnection();
+                return true;
+            }
+
+            tableName.Close();
+            database.CloseConnection();
+
+            return false;
+        }
+
+        public static List<weeklytheme> GetWeeklytheme(int id)
+        {
+            var result = new List<weeklytheme>();
+
+            var database = new Database("discordbot");
+
+            var str = string.Format("SELECT * FROM weeklytheme WHERE ID = '{0}'", id);
+            var tableName = database.FireCommand(str);
+
+            while (tableName.Read())
+            {
+                var theme = (string)tableName["theme"];
+                var url = (string)tableName["URL"];
+
+                result.Add(new weeklytheme
+                {
+                    Theme = theme,
+                    URL = url,
+                });
+            }
+            tableName.Close();
+            database.CloseConnection();
+
+            return result;
+
+        }
 
     }
 

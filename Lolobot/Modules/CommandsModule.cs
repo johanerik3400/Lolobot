@@ -98,14 +98,21 @@ namespace Lolobot.Modules
         [Remarks("StreamerTest")]
         public async Task StreamerTest(IUser user)
         {
-            if(user.Game.GetValueOrDefault().StreamType == StreamType.Twitch)
+            String timeStamp = GetTimestamp(DateTime.Now);
+
+            int day = (int)DateTime.Now.DayOfWeek;
+
+            
+
+            if (user.Game.GetValueOrDefault().StreamType == StreamType.Twitch)
             {
-                await ReplyAsync($"User is streaming on {user.Game.GetValueOrDefault().StreamType}");
+                await ReplyAsync($"User is streaming on {user.Game.GetValueOrDefault().StreamType} --- {timeStamp} --- Day: {day} --- Votephase: {Configuration.Load().Votephase}");
             }
             else
             {
-                await ReplyAsync($"User is not streaming: {user.Game.GetValueOrDefault().StreamType}");
+                await ReplyAsync($"User is not streaming: {user.Game.GetValueOrDefault().StreamType} --- {timeStamp} --- Day: {day} --- Votephase: {Configuration.Load().Votephase}");
             }
+
             /*var eb = new EmbedBuilder();
             eb.WithColor(0xFF69B4);
 
@@ -116,8 +123,12 @@ namespace Lolobot.Modules
             eb.WithImageUrl("https://puu.sh/wcOqN/aec0cd6536.jpg");
 
             await ReplyAsync("", false, eb);*/
-        
-    }
+        }
+
+        public static String GetTimestamp(DateTime value)
+        {
+            return value.ToString("yyyyMMddHHmmss");
+        }
     }
 
 }

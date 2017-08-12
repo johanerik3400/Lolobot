@@ -19,8 +19,9 @@ namespace Lolobot
         public string Prefix { get; set; } = "!";
         /// <summary> Your bot's login token. </summary>
         public string Token { get; set; } = "";
-        /// <summary> Your bot's embed color. </summary>
-        public string Embedcolor { get; set; } = "0xFF69B4";
+        public int Signupphase { get; set; }
+        public int Votephase { get; set; }
+        public int WeeklyID { get; set; }
 
         public static void EnsureExists()
         {
@@ -54,6 +55,27 @@ namespace Lolobot
         {
             string file = Path.Combine(AppContext.BaseDirectory, FileName);
             return JsonConvert.DeserializeObject<Configuration>(File.ReadAllText(file));
+        }
+
+        public static void SetVotephase(int value)
+        {
+            var config = Load();
+            config.Votephase = value;
+            config.SaveJson();
+        }
+
+        public static void SetSignupphase(int value)
+        {
+            var config = Load();
+            config.Signupphase = value;
+            config.SaveJson();
+        }
+
+        public static void SetWeeklyID(int value)
+        {
+            var config = Load();
+            config.WeeklyID = value;
+            config.SaveJson();
         }
 
         /// <summary> Convert the configuration to a json string. </summary>

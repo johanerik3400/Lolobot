@@ -31,6 +31,8 @@ namespace Lolobot.Modules
             keyword = keyword.Replace("'", "''");
             description = description.Replace("'", "''");
 
+            Console.WriteLine(keyword + description);
+
             bool faqadd;
 
             if (Uri.IsWellFormedUriString(URL, UriKind.Absolute))
@@ -41,6 +43,7 @@ namespace Lolobot.Modules
             }
             else
             {
+                URL = URL.Replace("'", "''");
                 eb.WithDescription($"{URL} {description}");
                 faqadd = Database.AddFaq(keyword, null, $"{URL} {description} ", Context.User);
                 eb.WithFooter("Either there was no URL given, or it was incorrect. If you meant to add an URL to this FAQ, check that the URL is a proper URL, delete the old FAQ and remake it.");
@@ -68,6 +71,8 @@ namespace Lolobot.Modules
         {
             var eb = new EmbedBuilder();
             eb.WithColor(0xFF69B4);
+
+            keyword = keyword.Replace("'", "''");
 
             var result = Database.CheckExistingFAQ(keyword);
             if (result.Count() <= 0)
@@ -100,6 +105,8 @@ namespace Lolobot.Modules
         {
             var eb = new EmbedBuilder();
             eb.WithColor(0xFF69B4);
+
+            keyword = keyword.Replace("'", "''");
 
             var result = Database.CheckExistingFAQ(keyword);
             if (result.Count() <= 0)

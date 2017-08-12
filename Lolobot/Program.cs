@@ -12,6 +12,7 @@ namespace Lolobot
 
         public static DiscordSocketClient client;
         private CommandHandler _commands;
+        private TimerHandler _timer;
 
         public async Task StartAsync()
         {
@@ -35,6 +36,9 @@ namespace Lolobot
 
             _commands = new CommandHandler();                // Initialize the command handler service
             await _commands.InstallAsync(client);
+
+            _timer = new TimerHandler();
+            _timer.StartTimer();
 
             await Task.Delay(-1);                            // Prevent the console window from closing.
         }
